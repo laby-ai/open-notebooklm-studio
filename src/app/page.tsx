@@ -13,6 +13,7 @@ import {
   BookOpen,
   Settings,
   CreditCard,
+  LogIn,
 } from 'lucide-react';
 import { AppProvider } from '@/contexts/AppContext';
 import { ThreeColumnLayout } from '@/components/layout/ThreeColumnLayout';
@@ -64,6 +65,21 @@ function PremiumButton({ onClick, children, variant = 'primary', className = '',
     secondary: 'liquid-glass-btn text-[var(--text-primary)]',
   };
   return <button onClick={onClick} aria-label={ariaLabel} data-testid={testId} className={`${base} ${variants[variant]} ${className}`}>{children}</button>;
+}
+
+function PremiumLink({ href, children, variant = 'primary', className = '', ariaLabel, testId }: {
+  href: string; children: React.ReactNode; variant?: 'primary' | 'secondary'; className?: string; ariaLabel?: string; testId?: string;
+}) {
+  const base = 'px-6 py-3 rounded-full font-medium transition-all duration-500 inline-flex items-center justify-center gap-2';
+  const variants = {
+    primary: 'liquid-glass-btn-primary bg-white text-black hover:scale-105',
+    secondary: 'liquid-glass-btn text-[var(--text-primary)]',
+  };
+  return (
+    <a href={href} aria-label={ariaLabel} data-testid={testId} className={`${base} ${variants[variant]} ${className}`}>
+      {children}
+    </a>
+  );
 }
 
 interface WorkspaceNotebook {
@@ -405,51 +421,105 @@ function NotebookHome({
 }
 
 // ---- Landing Page ----
-function LandingPage({ onEnter, onConfigure }: { onEnter: () => void; onConfigure: () => void }) {
+function LandingPage({
+  accountStatus,
+  onOpenNotebookHome,
+}: {
+  accountStatus: AccountCenterStatus | null;
+  onOpenNotebookHome: () => void;
+}) {
+  const accountUrl = accountStatus?.publicUrl || '/#notebooks';
+  const accountCtaText = accountStatus?.publicUrl ? '登录账号' : '进入工作台';
+
   return (
-    <div className="min-h-screen text-[var(--text-primary)] selection:bg-[var(--border-primary)]">
-      {/* Nav — liquid glass bar */}
-      <nav className="liquid-glass-card fixed top-0 w-full z-50 rounded-none border-x-0 border-t-0 px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <BrandMark compact />
-          <span className="font-semibold text-xl tracking-tight text-[var(--text-primary)]">灵笔工作室</span>
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] selection:bg-[var(--border-primary)]">
+      <nav className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]/86 px-6 py-4 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <BrandMark compact />
+            <span className="font-semibold text-xl tracking-tight text-[var(--text-primary)]">灵笔工作室</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onOpenNotebookHome}
+              className="liquid-glass-btn rounded-full px-4 py-2 text-sm"
+              data-testid="nav-open-notebooks"
+            >
+              资料工作台
+            </button>
+            <a
+              href={accountUrl}
+              className="liquid-glass-btn-primary rounded-full px-5 py-2 text-sm"
+              data-testid="nav-login-account"
+            >
+              <LogIn className="h-4 w-4" />
+              {accountCtaText}
+            </a>
+          </div>
         </div>
-        <PremiumButton variant="secondary" onClick={onEnter} ariaLabel="进入工作台（顶部导航）" testId="nav-enter-workbench" className="text-sm py-2 px-4">
-          进入工作台
-        </PremiumButton>
       </nav>
 
-      {/* Hero */}
-      <div className="relative overflow-hidden min-h-screen flex flex-col items-center justify-start pt-24 pb-14">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(34,211,238,0.14),transparent_30%),radial-gradient(circle_at_34%_55%,rgba(99,102,241,0.20),transparent_34%),linear-gradient(180deg,rgba(3,7,18,0.25),rgba(3,7,18,0.78))]" />
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] mix-blend-screen opacity-70" style={{ background: 'var(--blob-purple)' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] rounded-full blur-[150px] mix-blend-screen opacity-60" style={{ background: 'var(--blob-pink)' }} />
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full blur-[130px] mix-blend-screen opacity-75" style={{ background: 'var(--blob-cyan)' }} />
+      <section className="relative flex min-h-[calc(100vh-73px)] flex-col justify-between overflow-hidden px-6 pt-20">
+        <div className="mx-auto grid w-full max-w-7xl gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+          <div className="max-w-3xl">
+            <p className="mb-5 inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-[var(--glass-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)]">
+              资料理解、证据问答和内容产物工作台
+            </p>
+            <h1 className="text-5xl font-semibold tracking-tight text-[var(--text-primary)] md:text-7xl">
+              把资料变成可以追问、引用和交付的工作流。
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-secondary)]">
+              上传文件、网页或粘贴文本，在资料对话中追问证据，再生成知识卡片、语音摘要、课堂内容和基础演示文稿。
+            </p>
 
-        <div className="relative z-10 w-full max-w-[1500px] mx-auto px-6 text-center mt-2">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.08] mb-6 text-white drop-shadow-[0_8px_36px_rgba(34,211,238,0.18)]">
-            灵笔工作室<br /><span className="text-cyan-100">让资料开口说话</span>
-          </h1>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <PremiumLink
+                href={accountUrl}
+                ariaLabel={accountStatus?.publicUrl ? '登录账号并进入应用门户' : '进入资料工作台'}
+                testId="hero-login-account"
+                className="text-base px-7 py-3.5"
+              >
+                <LogIn size={18} />
+                {accountCtaText}
+              </PremiumLink>
+              <PremiumButton
+                variant="secondary"
+                onClick={onOpenNotebookHome}
+                ariaLabel="查看资料工作台"
+                testId="hero-open-notebooks"
+                className="text-base px-7 py-3.5"
+              >
+                查看资料工作台 <ChevronRight size={18} />
+              </PremiumButton>
+            </div>
 
-          <p className="text-lg md:text-2xl text-slate-200/88 max-w-4xl mx-auto mb-8 font-light leading-relaxed">
-            面向资料理解与内容创作的 AI 工作台。<br className="hidden md:block" />上传资料、追问证据、生成报告、卡片、演示文稿和播客音频。
-          </p>
+            <div className="mt-8 grid max-w-2xl gap-3 text-sm text-[var(--text-secondary)] sm:grid-cols-3">
+              {['来源可追溯', '产物可下载', '用量接账号'].map(item => (
+                <div key={item} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--glass-subtle)] px-4 py-3">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
 
-          <Reveal direction="up" delay={150} className="flex justify-center gap-6">
-            <PremiumButton onClick={onEnter} ariaLabel="进入工作台（开始创作）" testId="hero-enter-workbench" className="text-lg py-4 px-8">
-              进入工作台 <ChevronRight size={20} />
-            </PremiumButton>
-            <PremiumButton variant="secondary" onClick={onConfigure} ariaLabel="先配置模型再进入工作台" testId="hero-configure-model" className="text-lg py-4 px-8">
-              <PlayCircle size={20} /> 先配置模型
-            </PremiumButton>
-          </Reveal>
-
-          {/* Mockup */}
-          <Reveal direction="scale" delay={350} className="mt-10 flex w-full justify-center">
+          <Reveal direction="scale" delay={120} className="min-w-0">
             <HeroWorkbenchScreenshot />
           </Reveal>
         </div>
-      </div>
+        <div className="mx-auto mt-12 grid w-full max-w-7xl gap-4 pb-10 md:grid-cols-3">
+          {[
+            ['资料对话', '把回答绑定到来源片段，减少无证据结论。'],
+            ['Studio 产物', '从同一批资料生成卡片、语音摘要、课堂和简报。'],
+            ['账号与用量', accountStatus?.publicUrl ? '登录账号门户查看额度和后续成员用量。' : '配置账号中心后可接入成员额度和计费。'],
+          ].map(([title, body]) => (
+            <div key={title} className="liquid-glass-card rounded-2xl p-5">
+              <h2 className="text-base font-semibold">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Features */}
       <section className="py-40 relative border-t border-[var(--glass-border)]">
@@ -464,7 +534,7 @@ function LandingPage({ onEnter, onConfigure }: { onEnter: () => void; onConfigur
             <Reveal delay={100} className="order-2 md:order-1">
               <h3 className="text-3xl font-semibold mb-6 flex items-center gap-4"><LinkIcon className="text-blue-500" /> 结论可追溯</h3>
               <p className="text-xl text-[var(--text-secondary)] leading-relaxed font-light">
-                每一个核心结论都自动绑定原文出处。在富文本报告或播放器中点击脚注，即可在侧边栏唤出证据链溯源弹窗，直接高亮论文原句。杜绝学术幻觉，建立坚实的信任链。
+                回答、卡片和产物都尽量带回资料片段。用户可以从结论回到来源，判断这句话是否真的来自上传内容。
               </p>
             </Reveal>
             <Reveal direction="scale" delay={300} className="order-1 md:order-2">
@@ -479,7 +549,7 @@ function LandingPage({ onEnter, onConfigure }: { onEnter: () => void; onConfigur
             <Reveal delay={300}>
               <h3 className="text-3xl font-semibold mb-6 flex items-center gap-4"><PlayCircle className="text-purple-500" /> 多形态产物</h3>
               <p className="text-xl text-[var(--text-secondary)] leading-relaxed font-light">
-                不再是枯燥的文字堆砌。系统自动生成音频讲解、双语字幕，并在幻灯片特定时间点精准叠加激光笔、高亮框等标注，提供沉浸式的学术视听体验。
+                从同一批资料生成语音摘要、知识卡片、虚拟教室内容和基础演示文稿。每个结果都回到工作台内打开、复核和下载。
               </p>
             </Reveal>
           </div>
@@ -491,9 +561,9 @@ function LandingPage({ onEnter, onConfigure }: { onEnter: () => void; onConfigur
         <Reveal>
           <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-8 text-center">开始处理你的资料</h2>
           <div className="flex justify-center">
-            <PremiumButton onClick={onEnter} ariaLabel="开始试用并进入工作台" testId="cta-enter-workbench" className="text-lg py-4 px-10">
-              开始试用 <ArrowRight size={20} />
-            </PremiumButton>
+            <PremiumLink href={accountUrl} ariaLabel={accountStatus?.publicUrl ? '登录账号并进入应用门户' : '进入资料工作台'} testId="cta-login-account" className="text-lg py-4 px-10">
+              {accountCtaText} <ArrowRight size={20} />
+            </PremiumLink>
           </div>
         </Reveal>
       </section>
@@ -550,7 +620,7 @@ function AcademicPresenterContent({
 
 export default function HomePage() {
   const [entered, setEntered] = useState(false);
-  const [showLanding, setShowLanding] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
   const [openSettingsOnEnter, setOpenSettingsOnEnter] = useState(false);
   const [notebooks, setNotebooks] = useState<WorkspaceNotebook[]>([]);
   const [activeNotebookId, setActiveNotebookId] = useState<string | null>(null);
@@ -648,6 +718,12 @@ export default function HomePage() {
       if (params.get('view') === 'landing') {
         setShowLanding(true);
         setEntered(false);
+        return;
+      }
+
+      if (!window.location.hash && !window.location.search) {
+        setShowLanding(true);
+        setEntered(false);
       }
     };
 
@@ -693,12 +769,16 @@ export default function HomePage() {
 
   const openNotebook = (id: string) => enterWorkbench(false, id);
 
-  const backToNotebookHome = () => {
+  const openNotebookHome = () => {
     setEntered(false);
     setShowLanding(false);
     if (window.location.hash !== '#notebooks') {
       window.history.replaceState(null, '', `${window.location.pathname}#notebooks`);
     }
+  };
+
+  const backToNotebookHome = () => {
+    openNotebookHome();
   };
 
   const activeNotebook = notebooks.find(notebook => notebook.id === activeNotebookId) || notebooks[0] || createDefaultNotebooks()[0];
@@ -715,7 +795,10 @@ export default function HomePage() {
             onSourceGuideDismiss={() => setShowSourceGuide(false)}
           />
         ) : showLanding ? (
-          <LandingPage onEnter={() => enterWorkbench(false)} onConfigure={() => enterWorkbench(true)} />
+          <LandingPage
+            accountStatus={accountStatus}
+            onOpenNotebookHome={openNotebookHome}
+          />
         ) : (
           <NotebookHome
             notebooks={notebooks.length > 0 ? notebooks : createDefaultNotebooks()}
@@ -726,7 +809,7 @@ export default function HomePage() {
             onConfigure={() => enterWorkbench(true)}
             onShowLanding={() => {
               setShowLanding(true);
-              window.history.replaceState(null, '', `${window.location.pathname}?view=landing`);
+              window.history.replaceState(null, '', window.location.pathname);
             }}
           />
         )}

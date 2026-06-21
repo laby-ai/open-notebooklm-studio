@@ -5,6 +5,8 @@ import type { RagSourceInput } from '@/lib/rag';
 import { buildGroundedRetrievalContext, toRetrievalMetadata } from '@/lib/grounded-retrieval';
 import { auditCitationMarkers } from '@/lib/citation-audit';
 import { resolveServerRuntimeAIConfig } from '@/lib/runtime-ai-config';
+import { reserveAIUsage } from '@/lib/account-ai-billing';
+import { AccountServiceError } from '@/lib/account-entitlement-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,6 +47,7 @@ export async function POST(request: NextRequest) {
     const systemPrompt = mode === 'report'
       ? SYSTEM_PROMPTS.reportGeneration
       : SYSTEM_PROMPTS.academicQA;
+    const modelName = runtimeConfig.model?.trim() || 'doubao-seed-2-0-pro-260215';
     const boundedMaxTokens = Number.isInteger(maxTokens) && typeof maxTokens === 'number'
       ? Math.min(Math.max(maxTokens, 1), 4096)
       : undefined;
@@ -74,6 +77,26 @@ export async function POST(request: NextRequest) {
       },
     ];
 
+    let usageReservation = null;
+    try {
+      usageReservation = await reserveAIUsage({
+        route: 'chat',
+        modelName,
+        inputText: message,
+        promptContext: grounded.promptContext,
+      });
+    } catch (billingError) {
+      const status = billingError instanceof AccountServiceError ? billingError.status : 402;
+      const code = billingError instanceof AccountServiceError ? billingError.code : 'account_billing_failed';
+      return new Response(JSON.stringify({
+        error: '账号额度预占失败，请检查账号额度或稍后重试。',
+        billing: { status: 'failed', code },
+      }), {
+        status,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+      });
+    }
+
     // Stream response as SSE
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -85,10 +108,15 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({
               citations: grounded.citations,
               retrieval: toRetrievalMetadata(grounded),
+              billing: usageReservation ? { status: 'reserved', estimatedUnits: usageReservation.estimatedUnits } : undefined,
+            })}\n\n`));
+          } else if (usageReservation) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              billing: { status: 'reserved', estimatedUnits: usageReservation.estimatedUnits },
             })}\n\n`));
           }
           for await (const chunk of llmStream(messages, {
-            model: 'doubao-seed-2-0-pro-260215',
+            model: modelName,
             temperature: mode === 'report' ? 0.5 : 0.3,
             maxTokens: boundedMaxTokens,
             signal: llmSignal,
@@ -99,9 +127,21 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({
             citationAudit: auditCitationMarkers(answerText, grounded.citations),
           })}\n\n`));
+          if (usageReservation) {
+            try {
+              await usageReservation.settle(answerText);
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ billing: { status: 'settled' } })}\n\n`));
+            } catch (billingError) {
+              const code = billingError instanceof AccountServiceError ? billingError.code : 'account_settle_failed';
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ billing: { status: 'settle_failed', code } })}\n\n`));
+            }
+          }
           controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
           controller.close();
         } catch (err) {
+          if (usageReservation) {
+            await usageReservation.release().catch(() => undefined);
+          }
           const timedOut = llmSignal.aborted || (err instanceof Error && /abort|timeout|timed out/i.test(err.message));
           const msg = timedOut
             ? `真实模型生成超过 ${Math.round(llmTimeoutMs / 1000)} 秒，已停止等待。请稍后重试或缩短问题。`
