@@ -74,7 +74,7 @@ export function buildContextualFallbackBullets(
 
 export function ensureSlideContentFromSources(slides: EnhancedSlideSpec[], papers: PaperInput[]): EnhancedSlideSpec[] {
   const defaultBullets: Record<string, string[]> = {
-    background: ['资料源可信是 NotebookLM-like 工作台的基础能力', '中央对话与右侧 Studio 必须复用同一证据上下文', '失败降级和引用状态需要对用户可见'],
+    background: ['资料源可信是资料工作台的基础能力', '中央对话与右侧 Studio 必须复用同一证据上下文', '失败降级和引用状态需要对用户可见'],
     gap: ['传统生成链路容易让不同产物引用不同上下文', '长任务缺少阶段反馈会让用户误以为系统卡死', '工程化交付需要真实模型、存储和健康检查共同闭环'],
     method: ['上传资料后进入持久化 source/chunk 数据结构', '基于 embedding 和 zvec 检索构建 grounded context', '知识卡片、报告、播客和 PPT 复用同一证据上下文'],
     result: ['真实 smoke 覆盖上传、向量检索和 Studio 多产物生成', '播客音频通过豆包语音合成真实生成并落到本地文件', 'PPTX 输出具备可解包的 slide XML 和正文内容'],

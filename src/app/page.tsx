@@ -12,6 +12,7 @@ import {
   Clock3,
   BookOpen,
   Settings,
+  CreditCard,
 } from 'lucide-react';
 import { AppProvider } from '@/contexts/AppContext';
 import { ThreeColumnLayout } from '@/components/layout/ThreeColumnLayout';
@@ -72,6 +73,13 @@ interface WorkspaceNotebook {
   updatedAt: string;
   accent: string;
 }
+
+type AccountCenterStatus = {
+  configured: boolean;
+  publicUrl: string | null;
+  billingMode: 'not_configured' | 'portal_only' | 'reservation_ready';
+  billingReservationReady: boolean;
+};
 
 const NOTEBOOKS_STORAGE_KEY = 'lingbi-workspace-notebooks';
 const ACTIVE_NOTEBOOK_STORAGE_KEY = 'lingbi-active-workspace-notebook';
@@ -198,6 +206,7 @@ function MultimodalVisual() {
 function NotebookHome({
   notebooks,
   activeNotebookId,
+  accountStatus,
   onCreate,
   onOpen,
   onConfigure,
@@ -205,6 +214,7 @@ function NotebookHome({
 }: {
   notebooks: WorkspaceNotebook[];
   activeNotebookId: string | null;
+  accountStatus: AccountCenterStatus | null;
   onCreate: () => void;
   onOpen: (id: string) => void;
   onConfigure: () => void;
@@ -226,6 +236,25 @@ function NotebookHome({
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {accountStatus?.publicUrl ? (
+              <a
+                href={accountStatus.publicUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="liquid-glass-btn rounded-full px-4 py-2 text-sm"
+                data-testid="notebook-home-account"
+              >
+                <CreditCard className="h-4 w-4" />
+                账号与用量
+              </a>
+            ) : (
+              <span
+                className="rounded-full border border-[var(--border-subtle)] bg-[var(--glass-subtle)] px-4 py-2 text-sm text-[var(--text-tertiary)]"
+                title="部署后配置账号中心地址即可启用"
+              >
+                账号与用量未配置
+              </span>
+            )}
             <button
               type="button"
               onClick={onConfigure}
@@ -251,20 +280,50 @@ function NotebookHome({
       <main className="mx-auto max-w-7xl px-6 py-10">
         <section className="mb-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <p className="mb-3 text-sm font-medium text-[var(--accent-blue)]">NotebookLM-like 工作流</p>
+            <p className="mb-3 text-sm font-medium text-[var(--accent-blue)]">资料工作台</p>
             <h2 className="max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-              先建立资料工作台，再上传来源、追问证据、生成 Studio 产物。
+              打开资料，追问证据，把内容整理成可交付产物。
             </h2>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--text-secondary)]">
+              首页只保留开始工作的必要入口：资料工作台、模型配置、账号与用量。上传、问答、知识卡片、语音摘要和课堂产物都在工作台内完成。
+            </p>
           </div>
-          <div className="liquid-glass-card rounded-2xl p-5">
-            <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
-              <BookOpen className="h-4 w-4 text-[var(--accent-blue)]" />
-              当前对齐到的产品路径
+          <div className="grid gap-4">
+            <div className="liquid-glass-card rounded-2xl p-5">
+              <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
+                <BookOpen className="h-4 w-4 text-[var(--accent-blue)]" />
+                推荐使用路径
+              </div>
+              <div className="grid gap-3 text-sm text-[var(--text-secondary)]">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--glass-subtle)] p-3">1. 新建或打开资料工作台</div>
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--glass-subtle)] p-3">2. 添加文件、网页、粘贴文本或快速研究来源</div>
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--glass-subtle)] p-3">3. 在资料对话中提问，并在右侧 Studio 生成产物</div>
+              </div>
             </div>
-            <div className="grid gap-3 text-sm text-[var(--text-secondary)]">
-              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--glass-subtle)] p-3">1. 新建或打开资料工作台</div>
-              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--glass-subtle)] p-3">2. 添加文件、网页、粘贴文本或快速研究来源</div>
-              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--glass-subtle)] p-3">3. 在资料对话中提问，并在 Studio 生成语音摘要、简报、报告、卡片</div>
+            <div className="liquid-glass-card rounded-2xl p-5">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                <CreditCard className="h-4 w-4 text-[var(--accent-emerald)]" />
+                账号与用量
+              </div>
+              <p className="text-sm leading-6 text-[var(--text-secondary)]">
+                {accountStatus?.billingReservationReady
+                  ? '账号中心已具备用量预占和结算配置，可把 AI 调用归集到成员额度。'
+                  : accountStatus?.publicUrl
+                    ? '账号门户已连接。当前先提供普通入口，后续模型调用会按成员额度接入预占和结算。'
+                    : '部署后配置账号中心地址，即可在这里进入账号门户并查看成员额度。'}
+              </p>
+              {accountStatus?.publicUrl && (
+                <a
+                  href={accountStatus.publicUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--glass-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:border-[var(--accent-blue)]"
+                  data-testid="notebook-home-account-card"
+                >
+                  打开账号门户
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              )}
             </div>
           </div>
         </section>
@@ -403,7 +462,7 @@ function LandingPage({ onEnter, onConfigure }: { onEnter: () => void; onConfigur
 
           <div className="grid md:grid-cols-2 gap-20 items-center mb-40">
             <Reveal delay={100} className="order-2 md:order-1">
-              <h3 className="text-3xl font-semibold mb-6 flex items-center gap-4"><LinkIcon className="text-blue-500" /> Claim Traceability</h3>
+              <h3 className="text-3xl font-semibold mb-6 flex items-center gap-4"><LinkIcon className="text-blue-500" /> 结论可追溯</h3>
               <p className="text-xl text-[var(--text-secondary)] leading-relaxed font-light">
                 每一个核心结论都自动绑定原文出处。在富文本报告或播放器中点击脚注，即可在侧边栏唤出证据链溯源弹窗，直接高亮论文原句。杜绝学术幻觉，建立坚实的信任链。
               </p>
@@ -418,7 +477,7 @@ function LandingPage({ onEnter, onConfigure }: { onEnter: () => void; onConfigur
               <MultimodalVisual />
             </Reveal>
             <Reveal delay={300}>
-              <h3 className="text-3xl font-semibold mb-6 flex items-center gap-4"><PlayCircle className="text-purple-500" /> Synchronized Multimodal</h3>
+              <h3 className="text-3xl font-semibold mb-6 flex items-center gap-4"><PlayCircle className="text-purple-500" /> 多形态产物</h3>
               <p className="text-xl text-[var(--text-secondary)] leading-relaxed font-light">
                 不再是枯燥的文字堆砌。系统自动生成音频讲解、双语字幕，并在幻灯片特定时间点精准叠加激光笔、高亮框等标注，提供沉浸式的学术视听体验。
               </p>
@@ -430,7 +489,7 @@ function LandingPage({ onEnter, onConfigure }: { onEnter: () => void; onConfigur
       {/* CTA */}
       <section className="py-32 flex flex-col items-center border-t border-[var(--glass-border)]">
         <Reveal>
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-8 text-center">Ready to begin?</h2>
+          <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-8 text-center">开始处理你的资料</h2>
           <div className="flex justify-center">
             <PremiumButton onClick={onEnter} ariaLabel="开始试用并进入工作台" testId="cta-enter-workbench" className="text-lg py-4 px-10">
               开始试用 <ArrowRight size={20} />
@@ -496,6 +555,7 @@ export default function HomePage() {
   const [notebooks, setNotebooks] = useState<WorkspaceNotebook[]>([]);
   const [activeNotebookId, setActiveNotebookId] = useState<string | null>(null);
   const [showSourceGuide, setShowSourceGuide] = useState(false);
+  const [accountStatus, setAccountStatus] = useState<AccountCenterStatus | null>(null);
 
   useEffect(() => {
     try {
@@ -521,6 +581,22 @@ export default function HomePage() {
       // Ignore localStorage failures in privacy modes.
     }
   }, [activeNotebookId, notebooks]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadAccountStatus() {
+      try {
+        const response = await fetch('/api/account/status', { cache: 'no-store' });
+        if (!response.ok) return;
+        const status = await response.json() as AccountCenterStatus;
+        if (!cancelled) setAccountStatus(status);
+      } catch {
+        if (!cancelled) setAccountStatus(null);
+      }
+    }
+    void loadAccountStatus();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (entered || showLanding) return;
@@ -644,6 +720,7 @@ export default function HomePage() {
           <NotebookHome
             notebooks={notebooks.length > 0 ? notebooks : createDefaultNotebooks()}
             activeNotebookId={activeNotebookId}
+            accountStatus={accountStatus}
             onCreate={createNotebook}
             onOpen={openNotebook}
             onConfigure={() => enterWorkbench(true)}

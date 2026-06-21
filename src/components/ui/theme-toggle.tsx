@@ -8,21 +8,17 @@ import { useState, useEffect, useCallback } from 'react';
  * 天体滑块：太阳/月亮 + 星星 + 云朵 + 流星
  */
 export function ThemeToggle() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   const applyTheme = useCallback((dark: boolean) => {
     const root = document.documentElement;
-    if (dark) {
-      root.removeAttribute('data-theme');
-    } else {
-      root.setAttribute('data-theme', 'light');
-    }
+    root.setAttribute('data-theme', dark ? 'dark' : 'light');
   }, []);
 
-  // 初始化：从 localStorage 读取，默认深色
+  // 初始化：从 localStorage 读取，默认白天模式
   useEffect(() => {
     const saved = localStorage.getItem('theme');
-    const dark = saved !== 'light';
+    const dark = saved === 'dark';
     setIsDark(dark);
     applyTheme(dark);
   }, [applyTheme]);
@@ -43,7 +39,7 @@ export function ThemeToggle() {
         checked={isDark}
         onChange={handleToggle}
       />
-      <label htmlFor="theme-toggle" className="theme-switch" aria-label="Toggle Dark Mode">
+      <label htmlFor="theme-toggle" className="theme-switch" aria-label="切换深浅主题">
         {/* 星空层 (暗黑模式可见) */}
         <div className="stars-container">
           <div className="star star-1" />

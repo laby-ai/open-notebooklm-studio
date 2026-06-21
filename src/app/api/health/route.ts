@@ -5,6 +5,7 @@ import { vectorStoreStatus } from '@/lib/vector-store';
 import { sourceStoreStatus } from '@/lib/ingestion-store';
 import { mineruJobHealth } from '@/lib/mineru-job';
 import { studioJobStoreStatus } from '@/lib/studio-job';
+import { getAccountCenterStatus } from '@/lib/account-center';
 
 function hasAll(values: Array<string | undefined>): boolean {
   return values.every(value => Boolean(value?.trim()));
@@ -51,6 +52,7 @@ export async function GET() {
       vectorStore: vectorStoreStatus(),
       sourceStore: sourceStoreStatus(),
       studioJobStore: studioJobStoreStatus(),
+      accountCenter: getAccountCenterStatus(),
     },
     deployment: {
       internalAppOriginConfigured: Boolean(process.env.INTERNAL_APP_ORIGIN?.trim()),
