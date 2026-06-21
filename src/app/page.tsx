@@ -136,13 +136,13 @@ function BrandMark({ compact = false }: { compact?: boolean }) {
 
 function HeroWorkbenchScreenshot() {
   return (
-    <div className="liquid-glass-card relative mx-auto w-[min(96vw,1500px)] overflow-hidden rounded-[1.75rem] p-2 ring-1 ring-cyan-300/10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_12%,rgba(14,165,233,0.18),transparent_28%),radial-gradient(circle_at_82%_72%,rgba(99,102,241,0.16),transparent_30%),linear-gradient(135deg,rgba(5,10,24,0.96),rgba(6,12,28,0.99))]" />
-      <div className="relative overflow-hidden rounded-[1.35rem] border border-cyan-100/12 bg-black/35 shadow-[0_28px_90px_rgba(0,0,0,0.36)]">
+    <div className="relative mx-auto w-full max-w-6xl overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] bg-[#08101f] p-2 shadow-[0_34px_110px_rgba(15,23,42,0.18)]">
+      <div className="absolute inset-x-12 -top-20 h-40 rounded-full bg-cyan-200/20 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[1.45rem] border border-white/10 bg-[#0b1224]">
         <img
           src="/assets/screenshots/lingbi-workbench-real.png"
           alt="灵笔工作室真实工作台截图"
-          className="block w-full object-cover"
+          className="block aspect-[1299/575] w-full object-cover object-top"
           loading="eager"
         />
       </div>
@@ -460,20 +460,21 @@ function LandingPage({
         </div>
       </nav>
 
-      <section className="relative flex min-h-[calc(100vh-73px)] flex-col justify-between overflow-hidden px-6 pt-20">
-        <div className="mx-auto grid w-full max-w-7xl gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-          <div className="max-w-3xl">
-            <p className="mb-5 inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-[var(--glass-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)]">
-              资料理解、证据问答和内容产物工作台
-            </p>
-            <h1 className="text-5xl font-semibold tracking-tight text-[var(--text-primary)] md:text-7xl">
-              把资料变成可以追问、引用和交付的工作流。
+      <section className="relative overflow-hidden px-6 pb-20 pt-20">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_50%_0%,rgba(219,234,254,0.9),transparent_58%)]" />
+        <div className="relative mx-auto max-w-7xl">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="text-6xl font-semibold tracking-tight text-[var(--text-primary)] md:text-8xl">
+              灵笔工作室
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--text-secondary)]">
+            <p className="mx-auto mt-6 max-w-3xl text-2xl leading-snug text-[var(--text-primary)] md:text-4xl">
+              把资料变成可以追问、引用和交付的工作流。
+            </p>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-[var(--text-secondary)] md:text-lg">
               上传文件、网页或粘贴文本，在资料对话中追问证据，再生成知识卡片、语音摘要、课堂内容和基础演示文稿。
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
               <PremiumLink
                 href={accountUrl}
                 ariaLabel={accountStatus?.publicUrl ? '登录账号并进入应用门户' : '进入资料工作台'}
@@ -494,43 +495,31 @@ function LandingPage({
               </PremiumButton>
             </div>
 
-            <div className="mt-8 grid max-w-2xl gap-3 text-sm text-[var(--text-secondary)] sm:grid-cols-3">
-              {['来源可追溯', '产物可下载', '用量接账号'].map(item => (
-                <div key={item} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--glass-subtle)] px-4 py-3">
-                  {item}
-                </div>
-              ))}
+            <div className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-[var(--text-tertiary)]">
+              <span>来源可追溯</span>
+              <span className="hidden h-1 w-1 rounded-full bg-[var(--border-medium)] sm:block" />
+              <span>产物可下载</span>
+              <span className="hidden h-1 w-1 rounded-full bg-[var(--border-medium)] sm:block" />
+              <span>用量接账号</span>
             </div>
           </div>
 
-          <Reveal direction="scale" delay={120} className="min-w-0">
+          <Reveal direction="scale" delay={120} className="mt-14">
             <HeroWorkbenchScreenshot />
           </Reveal>
-        </div>
-        <div className="mx-auto mt-12 grid w-full max-w-7xl gap-4 pb-10 md:grid-cols-3">
-          {[
-            ['资料对话', '把回答绑定到来源片段，减少无证据结论。'],
-            ['Studio 产物', '从同一批资料生成卡片、语音摘要、课堂和简报。'],
-            ['账号与用量', accountStatus?.publicUrl ? '登录账号门户查看额度和后续成员用量。' : '配置账号中心后可接入成员额度和计费。'],
-          ].map(([title, body]) => (
-            <div key={title} className="liquid-glass-card rounded-2xl p-5">
-              <h2 className="text-base font-semibold">{title}</h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{body}</p>
-            </div>
-          ))}
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-40 relative border-t border-[var(--glass-border)]">
+      <section className="py-28 relative border-t border-[var(--glass-border)]">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-32 text-center text-[var(--text-primary)]">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight mb-24 text-center text-[var(--text-primary)]">
               不止摘要。<br /> <span className="text-[var(--text-tertiary)]">从资料到可发布内容。</span>
             </h2>
           </Reveal>
 
-          <div className="grid md:grid-cols-2 gap-20 items-center mb-40">
+          <div className="grid md:grid-cols-2 gap-16 items-center mb-28">
             <Reveal delay={100} className="order-2 md:order-1">
               <h3 className="text-3xl font-semibold mb-6 flex items-center gap-4"><LinkIcon className="text-blue-500" /> 结论可追溯</h3>
               <p className="text-xl text-[var(--text-secondary)] leading-relaxed font-light">
@@ -542,7 +531,7 @@ function LandingPage({
             </Reveal>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-20 items-center mb-40">
+          <div className="grid md:grid-cols-2 gap-16 items-center mb-28">
             <Reveal direction="scale" delay={100}>
               <MultimodalVisual />
             </Reveal>
