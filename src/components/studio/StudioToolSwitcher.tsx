@@ -67,40 +67,60 @@ export function StudioToolSwitcher({
   activeTab: StudioTab;
   onSelect: (tab: StudioTab) => void;
 }) {
+  const renderNavButton = (item: StudioNavItem | StudioToolItem, options?: { compact?: boolean }) => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+
+    return (
+      <button
+        key={item.id}
+        data-testid={`studio-nav-${item.id}`}
+        aria-pressed={isActive}
+        onClick={() => onSelect(item.id)}
+        className={`spotlight-glass-card rounded-xl border text-left transition-all ${
+          options?.compact ? 'px-2.5 py-2' : 'px-3 py-2.5'
+        } ${
+          isActive
+            ? 'border-blue-400/50 bg-blue-500/10'
+            : 'border-[var(--glass-border)] bg-[var(--glass-subtle)] hover:border-[var(--border-hover)]'
+        }`}
+        title={`${item.label}：${item.desc}`}
+      >
+        <span className="flex items-center gap-2">
+          <span className={`flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${
+            'accent' in item ? item.accent : 'from-slate-500/10 to-blue-500/5'
+          } ${options?.compact ? 'h-7 w-7' : 'h-8 w-8'}`}>
+            <Icon className={`${options?.compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-[var(--text-secondary)]`} />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-[11px] font-semibold leading-tight text-[var(--text-primary)]">{item.label}</span>
+            {!options?.compact && (
+              <span className="mt-0.5 block truncate text-[10px] leading-tight text-[var(--text-tertiary)]">{item.desc}</span>
+            )}
+          </span>
+        </span>
+      </button>
+    );
+  };
+
   return (
-    <div className="space-y-2" data-testid="studio-tool-switcher">
+    <div className="space-y-4" data-testid="studio-tool-switcher">
       <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[var(--text-tertiary)]">
         <span>核心产物</span>
         <span className="text-[10px] font-medium text-[var(--text-quaternary)]">基于已选资料</span>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {STUDIO_NAV.map(item => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              data-testid={`studio-nav-${item.id}`}
-              aria-pressed={isActive}
-              onClick={() => onSelect(item.id)}
-              className={`spotlight-glass-card rounded-xl border px-3 py-2.5 text-left transition-all ${
-                isActive
-                  ? 'border-blue-400/50 bg-blue-500/10'
-                  : 'border-[var(--glass-border)] bg-[var(--glass-subtle)] hover:border-[var(--border-hover)]'
-              }`}
-              title={`${item.label}：${item.desc}`}
-            >
-              <span className="flex items-center gap-2">
-                <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${item.accent}`}>
-                  <Icon className="h-4 w-4 text-[var(--text-secondary)]" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[11px] font-semibold leading-tight text-[var(--text-primary)]">{item.label}</span>
-                </span>
-              </span>
-            </button>
-          );
-        })}
+        {STUDIO_NAV.map(item => renderNavButton(item))}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[var(--text-tertiary)]">
+          <span>练习工具</span>
+          <span className="text-[10px] font-medium text-[var(--text-quaternary)]">互动 / 测验 / 项目</span>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {STUDIO_ARTIFACT_TOOLS.map(item => renderNavButton(item, { compact: true }))}
+        </div>
       </div>
     </div>
   );
