@@ -4,10 +4,31 @@ import { publicClassroomOrigin } from '@/lib/virtual-classroom/runtime-config';
 
 export const dynamic = 'force-dynamic';
 
-export default function VirtualClassroomPage() {
+type SearchParams = Record<string, string | string[] | undefined>;
+
+function appendSearchParams(url: string, searchParams: SearchParams) {
+  const params = new URLSearchParams();
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach(item => params.append(key, item));
+      return;
+    }
+    if (typeof value === 'string') params.set(key, value);
+  });
+
+  const query = params.toString();
+  if (!query) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}${query}`;
+}
+
+export default async function VirtualClassroomPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>;
+}) {
   const classroomOrigin = publicClassroomOrigin();
   if (classroomOrigin) {
-    redirect(classroomOrigin);
+    redirect(appendSearchParams(classroomOrigin, (await searchParams) || {}));
   }
 
   return (
