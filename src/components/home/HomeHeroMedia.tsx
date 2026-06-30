@@ -19,12 +19,12 @@ export function HomeHeroMedia() {
         muted
         loop
         playsInline
-        preload="auto"
-        poster="/assets/home/lingbi-hero-poster.jpg"
+        preload="metadata"
+        poster="assets/home/lingbi-hero-poster.jpg"
         aria-hidden="true"
       >
-        <source src="/assets/home/lingbi-hero-loop.webm" type="video/webm" />
-        <source src="/assets/home/lingbi-hero-loop.mp4" type="video/mp4" />
+        <source src="assets/home/lingbi-hero-loop.webm" type="video/webm" />
+        <source src="assets/home/lingbi-hero-loop.mp4" type="video/mp4" />
       </video>
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_16%,rgba(255,255,255,0.94),rgba(255,255,255,0.20)_42%,rgba(255,255,255,0)_76%)]" />
